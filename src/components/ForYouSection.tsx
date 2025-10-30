@@ -1,7 +1,7 @@
 import { Star, Clock, MapPin, Truck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getImageUrl } from "@/lib/utils";
+import SmartImage from "@/components/ui/SmartImage";
 
 const restaurants = [
   {
@@ -10,7 +10,7 @@ const restaurants = [
     rating: 4.9,
     time: "15-25 min",
     distance: "0.5 km",
-    image: getImageUrl("tacos", 200, 200),
+    image: "tacos",
     category: "Mexicano",
     deliveryFee: "Grátis",
     tags: ["🔥 Mais Pedido", "⚡ Entrega Rápida"]
@@ -21,7 +21,7 @@ const restaurants = [
     rating: 4.7,
     time: "20-30 min",
     distance: "1.8 km",
-    image: getImageUrl("pasta", 200, 200),
+    image: "pasta",
     category: "Italiano",
     deliveryFee: "R$ 5,00",
     tags: ["💰 Cupom Disponível"]
@@ -32,7 +32,7 @@ const restaurants = [
     rating: 4.8,
     time: "10-20 min",
     distance: "0.3 km",
-    image: getImageUrl("acai", 200, 200),
+    image: "acai",
     category: "Açaí",
     deliveryFee: "Grátis",
     tags: ["🆕 Novo", "⚡ Entrega Rápida"]
@@ -51,10 +51,12 @@ const ForYouSection = () => {
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="flex gap-3 p-3">
-              <img
-                src={restaurant.image}
+              <SmartImage
+                query={restaurant.image || restaurant.category || restaurant.name}
+                width={80}
+                height={80}
                 alt={restaurant.name}
-                className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                className="w-20 h-20 rounded-xl flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">

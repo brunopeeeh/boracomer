@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArrows } from "@/components/ui/scroll-arrows";
+import SmartImage from "@/components/ui/SmartImage";
 
 const promotions = [
   {
@@ -16,7 +17,8 @@ const promotions = [
     image: "🍔",
     category: "Hamburguer",
     badge: "🔥 Mais Pedido",
-    deliveryFee: "Grátis"
+    deliveryFee: "Grátis",
+    imageQuery: "gourmet burger close up juicy cheeseburger"
   },
   {
     id: 2,
@@ -28,7 +30,8 @@ const promotions = [
     image: "🍕",
     category: "Pizza",
     badge: "⚡ Entrega Rápida",
-    deliveryFee: "R$ 3,00"
+    deliveryFee: "R$ 3,00",
+    imageQuery: "pepperoni pizza close up lots of pepperoni"
   },
   {
     id: 3,
@@ -40,7 +43,8 @@ const promotions = [
     image: "🍱",
     category: "Japonês",
     badge: "🆕 Novo",
-    deliveryFee: "Grátis"
+    deliveryFee: "Grátis",
+    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll"
   },
 ];
 
@@ -60,8 +64,14 @@ const PromotionsCarousel = () => {
             className="min-w-[280px] overflow-hidden shadow-elegant hover:shadow-lg transition-smooth cursor-pointer animate-scale-in"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="relative h-40 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-              <span className="text-7xl">{promo.image}</span>
+            <div className="relative h-40">
+              <SmartImage
+                query={promo.imageQuery || promo.category || promo.name}
+                width={320}
+                height={160}
+                alt={promo.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
               <Badge className="absolute top-3 right-3 gradient-gold text-foreground font-bold">
                 {promo.discount}
               </Badge>

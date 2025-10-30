@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
+import SmartImage from "@/components/ui/SmartImage";
 import MapboxMap from "@/components/MapboxMap";
 
 // Tipos e utilitários para lojas.json
@@ -27,6 +28,8 @@ interface Restaurant {
   image: string;
   discount: string;
   coordinates: [number, number]; // [lng, lat]
+  imageQuery?: string; // para SmartImage nos cards
+  category?: string; // para cores dos pins
 }
 
 // Haversine para calcular distância em km
@@ -68,10 +71,17 @@ function getEmoji(modelo?: string): string {
   return "🍽️";
 }
 
+// Token padrão do Mapbox (fallback). Pode ser sobrescrito via VITE_MAPBOX_TOKEN
+const DEFAULT_MAPBOX_TOKEN = "pk.eyJ1IjoiYnJ1bm9wZWVoIiwiYSI6ImNtZ2xiMDUyeDE0czMybXBxMDJqMzNhaTMifQ.avNOq-OXZFvbBT6baT5cCA";
+
+// Token inicial vindo do ambiente ou fallback
+const envToken = (import.meta as any).env?.VITE_MAPBOX_TOKEN as string | undefined;
+const initialToken = envToken || DEFAULT_MAPBOX_TOKEN;
+
 const Map = () => {
   const navigate = useNavigate();
-  const [mapboxToken, setMapboxToken] = useState("");
-  const [showTokenInput, setShowTokenInput] = useState(true);
+  const [mapboxToken, setMapboxToken] = useState(initialToken);
+  const [showTokenInput, setShowTokenInput] = useState(!initialToken);
   const [radiusFilter, setRadiusFilter] = useState(5); // km
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -130,6 +140,7 @@ const Map = () => {
     return entries.map((loja, idx) => {
       const coords: [number, number] = [loja.Longitude, loja.Latitude];
       const distKm = userLocation ? calculateDistance(userLocation, coords) : undefined;
+      const category = loja.modelo_negocio || "";
       return {
         id: idx,
         name: loja.nome_empresa,
@@ -137,6 +148,8 @@ const Map = () => {
         image: getEmoji(loja.modelo_negocio),
         discount: loja.tipo_atendimento || "",
         coordinates: coords,
+        imageQuery: loja.modelo_negocio || loja.nome_empresa,
+        category,
       };
     });
   }, [lojasData, userLocation]);
@@ -251,9 +264,13 @@ const Map = () => {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-2xl flex-shrink-0">
-                  {restaurant.image}
-                </div>
+                <SmartImage
+                  query={restaurant.imageQuery || restaurant.name}
+                  width={64}
+                  height={64}
+                  alt={restaurant.name}
+                  className="w-12 h-12 rounded-lg flex-shrink-0 object-cover"
+                />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground">{restaurant.name}</h3>
                   <div className="flex items-center gap-2">

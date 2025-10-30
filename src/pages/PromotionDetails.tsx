@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import SmartImage from "@/components/ui/SmartImage";
 
 const promotionsData = {
   "1": {
@@ -16,6 +17,7 @@ const promotionsData = {
     category: "Hamburguer",
     badge: "🔥 Mais Pedido",
     deliveryFee: "Grátis",
+    imageQuery: "gourmet burger close up juicy cheeseburger",
     description: "Os melhores hambúrgueres artesanais da cidade! Carne selecionada, pão brioche e ingredientes frescos.",
     validUntil: "31/12/2024",
     terms: [
@@ -40,6 +42,7 @@ const promotionsData = {
     category: "Pizza",
     badge: "⚡ Entrega Rápida",
     deliveryFee: "R$ 3,00",
+    imageQuery: "pepperoni pizza close up lots of pepperoni",
     description: "Autêntica pizza italiana feita no forno a lenha. Massa artesanal e ingredientes importados.",
     validUntil: "31/12/2024",
     terms: [
@@ -64,6 +67,7 @@ const promotionsData = {
     category: "Japonês",
     badge: "🆕 Novo",
     deliveryFee: "Grátis",
+    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll",
     description: "Sushi fresco preparado na hora com peixes de qualidade premium. Entrega super rápida!",
     validUntil: "31/12/2024",
     terms: [
@@ -119,8 +123,14 @@ const PromotionDetails = () => {
       </div>
 
       {/* Hero Image */}
-      <div className="relative h-64 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-        <span className="text-9xl">{promotion.image}</span>
+      <div className="relative h-64">
+        <SmartImage
+          query={promotion.imageQuery || promotion.category || promotion.name}
+          width={1024}
+          height={256}
+          alt={promotion.name}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <Badge className="absolute top-4 right-4 gradient-gold text-foreground font-bold text-lg px-4 py-2">
           {promotion.discount}
         </Badge>

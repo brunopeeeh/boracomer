@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import useIsMobile from "../hooks/use-is-mobile";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import SmartLogo from "@/components/ui/SmartLogo";
 
 const stories = [
   { id: 1, name: "Burger House", image: "🍔" },
@@ -88,8 +89,8 @@ const StoriesSection = () => {
           <div key={story.id} className="flex flex-col items-center gap-2 mx-1 sm:mx-2 flex-shrink-0 snap-start">
             <div className="relative bg-gradient-to-br from-primary to-accent p-[2px] rounded-full">
               <div className="bg-background rounded-full p-[3px]">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl sm:text-2xl">
-                  {story.image}
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full">
+                  <SmartLogo name={story.name} className="w-full h-full" title={story.name} />
                 </div>
               </div>
             </div>

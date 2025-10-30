@@ -1,6 +1,7 @@
 import { Heart, MessageCircle, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
+import SmartImage from "@/components/ui/SmartImage";
 
 const posts = [
   {
@@ -9,6 +10,7 @@ const posts = [
     userAvatar: "👩",
     restaurant: "Burger Premium",
     image: "🍔",
+    imageQuery: "gourmet burger close up juicy cheeseburger",
     likes: 42,
     comments: 8,
     rating: 5,
@@ -21,6 +23,7 @@ const posts = [
     userAvatar: "👨",
     restaurant: "Pizza Napoletana",
     image: "🍕",
+    imageQuery: "pepperoni pizza close up lots of pepperoni",
     likes: 35,
     comments: 5,
     rating: 5,
@@ -33,6 +36,7 @@ const posts = [
     userAvatar: "👩‍🦱",
     restaurant: "Sushi Express",
     image: "🍱",
+    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll",
     likes: 28,
     comments: 3,
     rating: 4,
@@ -69,8 +73,14 @@ const SocialFeed = () => {
                 </div>
               </div>
               
-              <div className="mb-3 h-48 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-7xl">
-                {post.image}
+              <div className="mb-3 h-48 rounded-xl overflow-hidden relative">
+                <SmartImage
+                  query={post.imageQuery || post.restaurant}
+                  width={640}
+                  height={320}
+                  alt={`${post.restaurant} - foto do post`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
               </div>
               
               <p className="text-sm text-foreground mb-3">{post.text}</p>

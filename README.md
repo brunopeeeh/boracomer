@@ -48,7 +48,19 @@ npm run preview
 ## Mapbox (opcional)
 
 - A página `Map` suporta Mapbox. Você pode inserir o token pela UI (campo de token), que é mantido em estado local.
-- Para uso em produção, considere variáveis de ambiente e um backend para proxy seguro.
+- Para uso em produção, configure a variável de ambiente `VITE_MAPBOX_TOKEN` e mantenha um fallback seguro.
+
+### Configuração do token via `.env`
+
+- Crie um arquivo `.env.local` na raiz do projeto com:
+
+```
+VITE_MAPBOX_TOKEN=pk.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+- O código lê `import.meta.env.VITE_MAPBOX_TOKEN`. Caso não exista, há um token público de fallback configurado para desenvolvimento.
+- Não versione tokens reais. O `.gitignore` ignora arquivos `.env*`.
+- Em produção, considere armazenar o token em variáveis de ambiente do servidor de build/deploy.
 
 ## Tecnologias
 

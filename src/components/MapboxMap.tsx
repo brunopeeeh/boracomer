@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
+import { getFallbackImageUrl } from "@/lib/images";
 
 interface Restaurant {
   id: number;
@@ -10,6 +11,7 @@ interface Restaurant {
   image: string;
   discount: string;
   coordinates: [number, number]; // [lng, lat]
+  category?: string;
 }
 
 interface MapboxMapProps {
@@ -20,16 +22,55 @@ interface MapboxMapProps {
   onRestaurantClick?: (restaurant: Restaurant) => void;
 }
 
+// Fallback público fornecido pelo usuário
+const DEFAULT_MAPBOX_TOKEN = "pk.eyJ1IjoiYnJ1bm9wZWVoIiwiYSI6ImNtZ2xiMDUyeDE0czMybXBxMDJqMzNhaTMifQ.avNOq-OXZFvbBT6baT5cCA";
+
+const MARKER_ZOOM_THRESHOLD = 14;
+
+function restaurantsToGeoJSON(items: Restaurant) {
+  // dummy to satisfy TS, actual implementation below
+}
+
+function restaurantsToFeatureCollection(items: Restaurant[]) {
+  return {
+    type: "FeatureCollection",
+    features: items.map((r) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: r.coordinates },
+      properties: {
+        id: r.id,
+        name: r.name,
+        discount: r.discount,
+        distance: r.distance,
+        category: r.category || "",
+      },
+    })),
+  } as GeoJSON.FeatureCollection<GeoJSON.Point>;
+}
+
+function getRingColor(restaurant: Restaurant) {
+  const s = (restaurant.category || restaurant.name || "").toLowerCase();
+  if (s.includes("pizza")) return "#e11d48"; // rosa/vermelho
+  if (s.includes("hamburg")) return "#fb923c"; // laranja
+  if (s.includes("sushi") || s.includes("japon")) return "#3b82f6"; // azul
+  if (s.includes("café") || s.includes("cafe")) return "#8b5cf6"; // roxo
+  if (s.includes("aça") || s.includes("acai")) return "#a855f7"; // roxo médio
+  if (s.includes("mexic") || s.includes("taco")) return "#f59e0b"; // amber
+  if (s.includes("pasta") || s.includes("massa")) return "#f97316"; // laranja forte
+  return "#ff7a00"; // padrão
+}
+
 const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaurantClick }: MapboxMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
+  const [mapZoomTrigger, setMapZoomTrigger] = useState(0);
 
   useEffect(() => {
-    if (!mapContainer.current || !apiKey) return;
+    if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = apiKey;
+    mapboxgl.accessToken = apiKey || DEFAULT_MAPBOX_TOKEN;
 
     // Initialize map
     const initialCenter = userLocation || [-40.3377, -20.3155]; // Vitória, ES
@@ -42,6 +83,86 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
 
     // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    // Add clustered source for restaurants
+    map.current.addSource("restaurants", {
+      type: "geojson",
+      data: restaurantsToFeatureCollection(restaurants),
+      cluster: true,
+      clusterMaxZoom: 13,
+      clusterRadius: 50,
+    });
+
+    // Cluster circles
+    map.current.addLayer({
+      id: "clusters",
+      type: "circle",
+      source: "restaurants",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#ff7a00",
+        "circle-radius": [
+          "step",
+          ["get", "point_count"],
+          18,
+          10, 22,
+          25, 26,
+          50, 32
+        ],
+        "circle-opacity": 0.85,
+      },
+    });
+
+    // Cluster count labels
+    map.current.addLayer({
+      id: "cluster-count",
+      type: "symbol",
+      source: "restaurants",
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": ["get", "point_count_abbreviated"],
+        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+        "text-size": 12,
+      },
+      paint: { "text-color": "#ffffff" },
+    });
+
+    // Unclustered small points (for click targets when zoomed out)
+    map.current.addLayer({
+      id: "unclustered-points",
+      type: "circle",
+      source: "restaurants",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": "#ff7a00",
+        "circle-radius": 4,
+        "circle-opacity": 0.7,
+      },
+    });
+
+    // Cluster click to expand
+    map.current.on("click", "clusters", (e) => {
+      const features = map.current!.queryRenderedFeatures(e.point, { layers: ["clusters"] });
+      const clusterId = features[0]?.properties && (features[0].properties["cluster_id"] as number);
+      const source: any = map.current!.getSource("restaurants");
+      if (clusterId && source) {
+        source.getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
+          if (err) return;
+          map.current!.easeTo({ center: (features[0] as any).geometry.coordinates, zoom });
+        });
+      }
+    });
+
+    map.current.on("mouseenter", "clusters", () => {
+      map.current!.getCanvas().style.cursor = "pointer";
+    });
+    map.current.on("mouseleave", "clusters", () => {
+      map.current!.getCanvas().style.cursor = "";
+    });
+
+    // Trigger marker refresh on zoom changes
+    map.current.on("zoomend", () => setMapZoomTrigger((n) => n + 1));
+    map.current.on("moveend", () => setMapZoomTrigger((n) => n + 1));
 
     // Cleanup
     return () => {
@@ -134,25 +255,57 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
         })
       : restaurants;
 
-    // Add new markers with clustering
+    // Update clustered source data
+    const src = map.current.getSource("restaurants") as mapboxgl.GeoJSONSource;
+    if (src) {
+      src.setData(restaurantsToFeatureCollection(filteredRestaurants) as any);
+    }
+
+    // Show HTML pins only at high zoom
+    if (map.current.getZoom() < MARKER_ZOOM_THRESHOLD) {
+      return;
+    }
+
+    // Add new markers (HTML pins)
     filteredRestaurants.forEach((restaurant) => {
       const el = document.createElement("div");
       el.className = "restaurant-marker";
+      const imgUrl = getFallbackImageUrl(restaurant.name, 96, 96);
+      const ringColor = getRingColor(restaurant);
       el.innerHTML = `
         <div style="
-          width: 40px;
-          height: 40px;
-          background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 20px;
+          position: relative;
+          width: 52px;
+          height: 72px;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          transition: transform 0.2s;
+          transition: transform 0.2s ease;
         ">
-          ${restaurant.image}
+          <div style="
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid ${ringColor}; /* aro por categoria */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            overflow: hidden;
+          ">
+            <img src="${imgUrl}" alt="${restaurant.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+          </div>
+          <div style="
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 11px solid transparent;
+            border-right: 11px solid transparent;
+            border-top: 18px solid ${ringColor}; /* ponteiro por categoria */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+          "></div>
         </div>
       `;
 
@@ -176,7 +329,7 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
         </div>
       `);
 
-      const marker = new mapboxgl.Marker(el)
+      const marker = new mapboxgl.Marker(el, { anchor: "bottom" })
         .setLngLat(restaurant.coordinates)
         .setPopup(popup)
         .addTo(map.current!);
@@ -196,12 +349,12 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
         duration: 1000,
       });
     }
-  }, [restaurants, radiusFilter, userLocation, onRestaurantClick]);
+  }, [restaurants, radiusFilter, userLocation, onRestaurantClick, mapZoomTrigger]);
 
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
-      {!apiKey && (
+      {!(apiKey || DEFAULT_MAPBOX_TOKEN) && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
           <div className="text-center p-6">
             <MapPin className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
