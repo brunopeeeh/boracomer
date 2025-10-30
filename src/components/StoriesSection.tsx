@@ -39,7 +39,8 @@ const stories = [
 ];
 
 const StoriesSection = () => {
-  const isMobile = useIsMobile();
+  // alinhar com Tailwind: sm = 640px
+  const isMobile = useIsMobile(640);
   // 6 no desktop, 4 no mobile
   const itemsPerPage = isMobile ? 4 : 6;
   const stepCount = isMobile ? 2 : 3; // mover 3 no desktop para sensação de passagem
@@ -90,7 +91,7 @@ const StoriesSection = () => {
           <div key={story.id} className="flex flex-col items-center gap-2 mx-1 sm:mx-2 flex-shrink-0 snap-start">
             <div className="relative bg-gradient-to-br from-primary to-accent p-[2px] rounded-full">
               <div className="bg-background rounded-full p-[3px]">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden">
                   <SmartLogo name={story.name} width={logoSize} height={logoSize} title={story.name} />
                 </div>
               </div>
