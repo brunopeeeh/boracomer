@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
-import { getFallbackImageUrl } from "@/lib/images";
+import { getFallbackImageUrl, resolveImageUrlAsync } from "@/lib/images";
 
 interface Restaurant {
   id: number;
@@ -382,7 +382,8 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
     filteredRestaurants.forEach((restaurant) => {
       const el = document.createElement("div");
       el.className = "restaurant-marker";
-      const imgUrl = getFallbackImageUrl(restaurant.name, 96, 96);
+      const queryStr = (restaurant.category || restaurant.name || "").toString();
+      const imgUrl = getFallbackImageUrl(queryStr, 96, 96);
       const ringColor = getRingColor(restaurant);
       // Wrapper interno para animação, evitando sobrescrever o transform usado pelo Mapbox no elemento raiz
       el.innerHTML = `
@@ -422,6 +423,14 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
           "></div>
         </div>
       `;
+
+      // Atualiza a imagem para Pexels quando disponível (mantém fallback imediato)
+      const imgEl = el.querySelector<HTMLImageElement>("img");
+      resolveImageUrlAsync(queryStr, 96, 96).then((url) => {
+        if (imgEl) imgEl.src = url;
+      }).catch(() => {
+        // mantém fallback em caso de erro
+      });
 
       const pinWrapper = el.querySelector<HTMLElement>(".pin-wrapper");
       // Animação segura: aplica transform no wrapper, não no elemento raiz do Marker

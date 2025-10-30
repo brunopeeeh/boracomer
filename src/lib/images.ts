@@ -57,3 +57,17 @@ export function useImageUrl(query: string, width = 320, height = 240) {
 
   return url;
 }
+
+// Resolver assíncrono para uso fora de componentes React (ex.: Mapbox HTML markers)
+export async function resolveImageUrlAsync(query: string, width = 320, height = 240): Promise<string> {
+  try {
+    const provider = (import.meta.env.VITE_IMAGE_PROVIDER as string | undefined)?.toLowerCase();
+    if (provider === "picsum") {
+      return getFallbackImageUrl(query, width, height);
+    }
+    const pexels = await fetchPexelsImageUrl(query, width, height);
+    return pexels || getFallbackImageUrl(query, width, height);
+  } catch {
+    return getFallbackImageUrl(query, width, height);
+  }
+}
