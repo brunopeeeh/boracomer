@@ -47,6 +47,7 @@ const StoriesSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const logoSize = isMobile ? 48 : 56; // garantir que o logo cabe no círculo
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -90,7 +91,7 @@ const StoriesSection = () => {
             <div className="relative bg-gradient-to-br from-primary to-accent p-[2px] rounded-full">
               <div className="bg-background rounded-full p-[3px]">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full">
-                  <SmartLogo name={story.name} className="w-full h-full" title={story.name} />
+                  <SmartLogo name={story.name} width={logoSize} height={logoSize} title={story.name} />
                 </div>
               </div>
             </div>
