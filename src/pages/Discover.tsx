@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Search, Filter, Star, MapPin, Clock, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { getImageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ const restaurants = [
     reviews: 234,
     distance: "1.2 km",
     time: "25-35 min",
-    image: "🍔",
+    image: getImageUrl("hamburger", 240, 240),
     posts: 45,
     followers: 1200,
     description: "Os melhores hambúrgueres artesanais da cidade",
@@ -29,7 +30,7 @@ const restaurants = [
     reviews: 456,
     distance: "2.5 km",
     time: "30-40 min",
-    image: "🍕",
+    image: getImageUrl("pizza", 240, 240),
     posts: 78,
     followers: 2300,
     description: "Autêntica pizza italiana no forno a lenha",
@@ -42,7 +43,7 @@ const restaurants = [
     reviews: 189,
     distance: "0.8 km",
     time: "20-30 min",
-    image: "🍱",
+    image: getImageUrl("sushi", 240, 240),
     posts: 34,
     followers: 890,
     description: "Sushi fresco e delivery rápido",
@@ -55,7 +56,7 @@ const restaurants = [
     reviews: 167,
     distance: "1.5 km",
     time: "20-30 min",
-    image: "🌮",
+    image: getImageUrl("tacos", 240, 240),
     posts: 28,
     followers: 650,
     description: "Sabores autênticos do México",
@@ -109,9 +110,11 @@ const Discover = () => {
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <div className="flex gap-4 p-4">
-              <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-5xl flex-shrink-0">
-                {restaurant.image}
-              </div>
+              <img
+                src={restaurant.image}
+                alt={restaurant.name}
+                className="w-24 h-24 rounded-xl object-cover flex-shrink-0"
+              />
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1">
