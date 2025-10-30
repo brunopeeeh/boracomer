@@ -28,6 +28,7 @@ const cache = new Map<string, string>();
 export function useImageUrl(query: string, width = 320, height = 240) {
   const key = useMemo(() => `${query}:${width}x${height}`.toLowerCase(), [query, width, height]);
   const [url, setUrl] = useState<string>(() => cache.get(key) || getFallbackImageUrl(query, width, height));
+  const provider = (import.meta.env.VITE_IMAGE_PROVIDER as string | undefined)?.toLowerCase();
 
   useEffect(() => {
     let mounted = true;
@@ -37,13 +38,22 @@ export function useImageUrl(query: string, width = 320, height = 240) {
         if (mounted) setUrl(cached);
         return;
       }
+      // Se configurado para usar apenas Picsum, evita consulta ao Pexels
+      if (provider === "picsum") {
+        const next = getFallbackImageUrl(query, width, height);
+        cache.set(key, next);
+        if (mounted) setUrl(next);
+        return;
+      }
+
+      // Caso contrário, tenta Pexels (se houver API key); senão cai no fallback
       const pexels = await fetchPexelsImageUrl(query, width, height);
       const next = pexels || getFallbackImageUrl(query, width, height);
       cache.set(key, next);
       if (mounted) setUrl(next);
     })();
     return () => { mounted = false; };
-  }, [key, query, width, height]);
+  }, [key, query, width, height, provider]);
 
   return url;
 }
