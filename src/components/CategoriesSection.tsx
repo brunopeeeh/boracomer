@@ -7,6 +7,10 @@ interface Category {
   emoji: string;
 }
 
+interface Loja {
+  modelo_negocio: string;
+}
+
 // Mapeia o modelo de negócio para um emoji
 const emojiMap: { [key: string]: string } = {
   "Açaiteria": "🍓",
@@ -63,7 +67,7 @@ const CategoriesSection = () => {
         const data = await response.json();
         
         // Extrai modelos de negócio únicos
-        const uniqueModelos = [...new Set(data.result.map((loja: any) => loja.modelo_negocio))];
+        const uniqueModelos = [...new Set(data.result.map((loja: Loja) => loja.modelo_negocio))];
         
         const fetchedCategories = uniqueModelos.map((modelo) => ({
           id: modelo as string,

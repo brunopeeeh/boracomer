@@ -49,7 +49,7 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
       userMarker.current?.remove();
       map.current?.remove();
     };
-  }, [apiKey]);
+  }, [apiKey, userLocation]);
 
   // Update user location marker
   useEffect(() => {

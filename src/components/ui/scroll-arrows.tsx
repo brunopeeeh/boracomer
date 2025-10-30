@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { RefObject } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -18,13 +18,13 @@ export function ScrollArrows({
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(true);
 
-  const check = () => {
+  const check = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setShowLeft(scrollLeft > 5); // Pequena margem para evitar problemas de precisão
     setShowRight(scrollLeft < scrollWidth - clientWidth - 5);
-  };
+  }, [containerRef]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -42,7 +42,7 @@ export function ScrollArrows({
       window.removeEventListener("resize", check);
       clearTimeout(timeoutId);
     };
-  }, [containerRef]);
+  }, [containerRef, check]);
 
   const scrollBy = (offset: number) => {
     const el = containerRef.current;
