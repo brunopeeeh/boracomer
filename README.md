@@ -62,6 +62,34 @@ VITE_MAPBOX_TOKEN=pk.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 - Não versione tokens reais. O `.gitignore` ignora arquivos `.env*`.
 - Em produção, considere armazenar o token em variáveis de ambiente do servidor de build/deploy.
 
+## Imagens (Pexels/Picsum)
+
+O projeto tem um resolvedor de imagens que pode operar com dois provedores:
+
+- `pexels` (recomendado para o MVP): baixa imagens reais do Pexels usando queries.
+- `picsum`: gera imagens estáveis por seed, sem necessidade de API.
+
+Controle isso pela variável `VITE_IMAGE_PROVIDER`:
+
+- `VITE_IMAGE_PROVIDER=pexels` (requer `VITE_PEXELS_API_KEY`).
+- `VITE_IMAGE_PROVIDER=picsum` (não requer chave).
+
+### Local
+
+Crie `.env.local` na raiz:
+
+```
+VITE_PEXELS_API_KEY=SEU_TOKEN_PEXELS
+VITE_IMAGE_PROVIDER=pexels
+```
+
+### Vercel
+
+- Nas Environment Variables do projeto, adicione:
+  - `VITE_PEXELS_API_KEY=SEU_TOKEN_PEXELS`
+  - `VITE_IMAGE_PROVIDER=pexels`
+- Este repositório inclui `vercel.json` fixando `VITE_IMAGE_PROVIDER=pexels` por padrão nos deploys.
+
 ## Tecnologias
 
 - `React`, `Vite`, `TypeScript`
