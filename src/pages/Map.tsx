@@ -236,7 +236,7 @@ const Map = () => {
       )}
 
       {/* Mapa Interativo */}
-      <div className="relative h-[400px]">
+      <div className="relative h-[70vh]">
         {!isLoadingLojas && (
         <MapboxMap
           restaurants={filteredRestaurants}
@@ -248,43 +248,6 @@ const Map = () => {
           }}
         />
         )}
-      </div>
-
-      <div className="px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-foreground">Próximos a Você</h2>
-          <Badge variant="secondary">{filteredRestaurants.length} locais</Badge>
-        </div>
-
-        <div className="space-y-3">
-          {filteredRestaurants.map((restaurant, index) => (
-            <Card
-              key={restaurant.id}
-              className="p-4 hover:shadow-lg transition-smooth cursor-pointer animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center gap-3">
-                <SmartImage
-                  query={restaurant.imageQuery || restaurant.name}
-                  width={64}
-                  height={64}
-                  alt={restaurant.name}
-                  className="w-12 h-12 rounded-lg flex-shrink-0 object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground">{restaurant.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{restaurant.distance}</span>
-                  </div>
-                </div>
-                <Badge className="gradient-gold text-foreground font-bold flex-shrink-0">
-                  {restaurant.discount}
-                </Badge>
-              </div>
-            </Card>
-          ))}
-        </div>
       </div>
 
       <BottomNav />
