@@ -1,73 +1,72 @@
-# Welcome to your Lovable project
+# BoraComer
 
-## Project info
+Aplicação web em React (Vite + TypeScript) com Tailwind e shadcn-ui. Inclui seção de Stories com comportamento semelhante ao Instagram e página de mapa com suporte a Mapbox.
 
-**URL**: https://lovable.dev/projects/4da17852-8e21-4194-8adc-74ed5aed88dc
+## Destaques
 
-## How can I edit this code?
+- Stories com rolagem suave e snap: `snap-x` + `snap-mandatory` com `snap-start` nos cards.
+- Desktop: 6 stories visíveis, avanço de 3 itens por clique; Mobile: 4 visíveis, avanço de 2 itens.
+- Scrollbar horizontal oculto nos Stories via utilitário `scrollbar-hide`.
+- UI baseada em Radix + shadcn-ui, ícones `lucide-react`, tailwind configurado.
 
-There are several ways of editing your application.
+## Requisitos
 
-**Use Lovable**
+- Node.js `>= 18` (recomendado `20`).
+- npm `>= 9`.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4da17852-8e21-4194-8adc-74ed5aed88dc) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Instalação
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+git clone https://github.com/brunopeeeh/boracomer.git
+cd boracomer
+npm install
 ```
 
-**Edit a file directly in GitHub**
+## Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `npm run dev`: inicia o servidor de desenvolvimento (Vite).
+- `npm run build`: gera build de produção.
+- `npm run build:dev`: build em modo desenvolvimento.
+- `npm run preview`: serve o build gerado localmente.
+- `npm run lint`: executa ESLint em todo o projeto.
 
-**Use GitHub Codespaces**
+## Desenvolvimento
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run dev
+# abra http://localhost:8080
+```
 
-## What technologies are used for this project?
+## Build e Preview
 
-This project is built with:
+```sh
+npm run build
+npm run preview
+# por padrão, http://localhost:8080 (se configurado no vite.config)
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Mapbox (opcional)
 
-## How can I deploy this project?
+- A página `Map` suporta Mapbox. Você pode inserir o token pela UI (campo de token), que é mantido em estado local.
+- Para uso em produção, considere variáveis de ambiente e um backend para proxy seguro.
 
-Simply open [Lovable](https://lovable.dev/projects/4da17852-8e21-4194-8adc-74ed5aed88dc) and click on Share -> Publish.
+## Tecnologias
 
-## Can I connect a custom domain to my Lovable project?
+- `React`, `Vite`, `TypeScript`
+- `Tailwind CSS`, `shadcn-ui`, `Radix UI`
+- `lucide-react`, `react-router-dom`
 
-Yes, you can!
+## CI (GitHub Actions)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- O repositório inclui um workflow de CI que executa `npm install`, `npm run lint` e `npm run build` em cada push/PR.
+- Arquivo: `.github/workflows/ci.yml`.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Estrutura
+
+- `src/components/StoriesSection.tsx`: seção de Stories com rolagem suave e snap.
+- `src/pages/Map.tsx`: página de mapa com filtros e entrada de token.
+- `src/components/ui/*`: componentes UI (shadcn + Radix).
+
+## Licença
+
+Este repositório é privado do autor; sem licença pública definida.
