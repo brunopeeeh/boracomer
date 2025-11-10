@@ -6,6 +6,7 @@ type SmartLogoProps = {
   height?: number;
   className?: string;
   title?: string;
+  fontScale?: number; // proporção do diâmetro para o tamanho da fonte
 };
 
 function getInitials(name: string) {
@@ -29,9 +30,10 @@ function getGradient(name: string) {
   return `linear-gradient(135deg, ${c1}, ${c2})`;
 }
 
-const SmartLogo: React.FC<SmartLogoProps> = ({ name, width = 56, height = 56, className = "", title }) => {
+const SmartLogo: React.FC<SmartLogoProps> = ({ name, width = 56, height = 56, className = "", title, fontScale = 0.36 }) => {
   const initials = getInitials(name);
   const background = getGradient(name);
+  const fontSize = Math.floor(Math.min(width, height) * fontScale);
   return (
     <div
       role="img"
@@ -39,7 +41,7 @@ const SmartLogo: React.FC<SmartLogoProps> = ({ name, width = 56, height = 56, cl
       style={{ width, height, borderRadius: 9999, background }}
       className={`flex items-center justify-center font-bold text-white shadow-sm ${className}`}
     >
-      <span style={{ letterSpacing: 0.5 }}>{initials}</span>
+      <span style={{ letterSpacing: 0.5, fontSize }}>{initials}</span>
     </div>
   );
 };
