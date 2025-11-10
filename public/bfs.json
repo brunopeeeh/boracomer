@@ -1,0 +1,100 @@
+{
+  "result": [
+    {
+      "nome_empresa": "The Burguer",
+      "modelo_negocio": "Hamburgueria",
+      "tipo_atendimento": "Presencial e Delivery",
+      "logradouro": "Rua Henrique Rosetti",
+      "numero": "33",
+      "bairro": "Bento Ferreira",
+      "cidade": "Vitória",
+      "estado": "ES",
+      "cep": "29050-700",
+      "img": "https://cdn-production.yooga.com.br/777e60070ed3b27634f3a92554adc3c0.png",
+      "link delivery": "bfs",
+      "endereco completo": "Rua Henrique Rosetti, 33 - Bento Ferreira, Vitória - ES, 29050-700",
+      "horario_funcionamento": [
+        {
+          "day_of_week": 0,
+          "day": "Domingo",
+          "hours": [
+            {
+              "start": "14:45:13",
+              "end": "22:45:59",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 1,
+          "day": "Segunda-feira",
+          "hours": [
+            {
+              "start": "14:45:20",
+              "end": "22:45:05",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 2,
+          "day": "Terça-feira",
+          "hours": [
+            {
+              "start": "14:45:25",
+              "end": "22:45:09",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 3,
+          "day": "Quarta-feira",
+          "hours": [
+            {
+              "start": "14:45:34",
+              "end": "22:45:16",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 4,
+          "day": "Quinta-feira",
+          "hours": [
+            {
+              "start": "14:45:40",
+              "end": "22:45:20",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 5,
+          "day": "Sexta-feira",
+          "hours": [
+            {
+              "start": "14:45:45",
+              "end": "22:45:26",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        },
+        {
+          "day_of_week": 6,
+          "day": "Sábado",
+          "hours": [
+            {
+              "start": "14:45:50",
+              "end": "22:45:30",
+              "type": "Delivery e Agendamento"
+            }
+          ]
+        }
+      ],
+      "Latitude": -20.312454,
+      "Longitude": -40.304224
+    }
+  ]
+}
+
