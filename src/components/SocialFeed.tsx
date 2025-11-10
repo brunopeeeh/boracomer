@@ -1,7 +1,9 @@
 import { Heart, MessageCircle, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import SmartImage from "@/components/ui/SmartImage";
+import burgerSocialImage from "@/assets/burger-social.jpg";
+import pizzaSocialImage from "@/assets/pizza-social.jpg";
+import sushiSocialImage from "@/assets/sushi-social.jpg";
 
 const posts = [
   {
@@ -9,8 +11,7 @@ const posts = [
     user: "Ana Silva",
     userAvatar: "👩",
     restaurant: "Burger Premium",
-    image: "🍔",
-    imageQuery: "gourmet burger close up juicy cheeseburger",
+    image: burgerSocialImage,
     likes: 42,
     comments: 8,
     rating: 5,
@@ -22,8 +23,7 @@ const posts = [
     user: "Carlos Oliveira",
     userAvatar: "👨",
     restaurant: "Pizza Napoletana",
-    image: "🍕",
-    imageQuery: "pepperoni pizza close up lots of pepperoni",
+    image: pizzaSocialImage,
     likes: 35,
     comments: 5,
     rating: 5,
@@ -35,8 +35,7 @@ const posts = [
     user: "Maria Santos",
     userAvatar: "👩‍🦱",
     restaurant: "Sushi Express",
-    image: "🍱",
-    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll",
+    image: sushiSocialImage,
     likes: 28,
     comments: 3,
     rating: 4,
@@ -73,13 +72,11 @@ const SocialFeed = () => {
                 </div>
               </div>
               
-              <div className="mb-3 h-48 rounded-xl overflow-hidden relative">
-                <SmartImage
-                  query={post.imageQuery || post.restaurant}
-                  width={640}
-                  height={320}
+              <div className="mb-3 h-48 rounded-xl overflow-hidden">
+                <img
+                  src={post.image}
                   alt={`${post.restaurant} - foto do post`}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               </div>
               

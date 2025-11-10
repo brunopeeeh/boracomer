@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin } from "lucide-react";
 import { getFallbackImageUrl, resolveImageUrlAsync } from "@/lib/images";
+import { toast } from "sonner";
 
 interface Restaurant {
   id: number;
@@ -79,6 +80,14 @@ const MapboxMap = ({ restaurants, apiKey, radiusFilter, userLocation, onRestaura
       style: "mapbox://styles/mapbox/navigation-day-v1",
       center: initialCenter,
       zoom: 14,
+    });
+
+    // Handle Mapbox errors (e.g., invalid token, style load failure)
+    map.current.on("error", (e) => {
+      try {
+        const msg = (e && (e as any).error && (e as any).error.message) || "Erro ao carregar o mapa";
+        toast.error(`Mapbox: ${msg}. Verifique seu token ou conexão.`);
+      } catch {}
     });
 
     // Add navigation controls

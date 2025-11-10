@@ -1,10 +1,13 @@
 import { Star, Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArrows } from "@/components/ui/scroll-arrows";
-import SmartImage from "@/components/ui/SmartImage";
+import { Skeleton } from "@/components/ui/skeleton";
+import burgerImage from "@/assets/burger-premium.jpg";
+import pizzaImage from "@/assets/pizza-napoletana.jpg";
+import sushiImage from "@/assets/sushi-platter.jpg";
 
 const promotions = [
   {
@@ -14,11 +17,10 @@ const promotions = [
     rating: 4.8,
     time: "25-35 min",
     distance: "1.2 km",
-    image: "🍔",
+    image: burgerImage,
     category: "Hamburguer",
     badge: "🔥 Mais Pedido",
-    deliveryFee: "Grátis",
-    imageQuery: "gourmet burger close up juicy cheeseburger"
+    deliveryFee: "Grátis"
   },
   {
     id: 2,
@@ -27,11 +29,10 @@ const promotions = [
     rating: 4.9,
     time: "30-40 min",
     distance: "2.5 km",
-    image: "🍕",
+    image: pizzaImage,
     category: "Pizza",
     badge: "⚡ Entrega Rápida",
-    deliveryFee: "R$ 3,00",
-    imageQuery: "pepperoni pizza close up lots of pepperoni"
+    deliveryFee: "R$ 3,00"
   },
   {
     id: 3,
@@ -40,37 +41,74 @@ const promotions = [
     rating: 4.7,
     time: "20-30 min",
     distance: "0.8 km",
-    image: "🍱",
+    image: sushiImage,
     category: "Japonês",
     badge: "🆕 Novo",
-    deliveryFee: "Grátis",
-    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll"
+    deliveryFee: "Grátis"
   },
 ];
 
 const PromotionsCarousel = () => {
   const navigate = useNavigate();
-
+  const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 350);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="px-4 py-4 relative">
       <h2 className="text-xl font-bold mb-4 text-foreground">Promoções Próximas</h2>
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-        {promotions.map((promo, index) => (
+      <div
+        id="promotions-carousel"
+        ref={scrollRef}
+        role="region"
+        aria-label="Carrossel de promoções"
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+      >
+        {isLoading && (
+          <>
+            {[0,1,2].map((i) => (
+              <Card key={`promo-skeleton-${i}`} className="min-w-[280px] overflow-hidden shadow-elegant">
+                <div className="relative h-40">
+                  <Skeleton className="absolute inset-0" />
+                </div>
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-24" />
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </>
+        )}
+        {!isLoading && promotions.map((promo, index) => (
           <Card 
             key={promo.id} 
             onClick={() => navigate(`/promotion/${promo.id}`)}
-            className="min-w-[280px] overflow-hidden shadow-elegant hover:shadow-lg transition-smooth cursor-pointer animate-scale-in"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigate(`/promotion/${promo.id}`);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`Ver promoção de ${promo.discount} em ${promo.name}`}
+            className="min-w-[280px] overflow-hidden shadow-elegant hover:shadow-lg focus:shadow-xl focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-smooth cursor-pointer animate-scale-in"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="relative h-40">
-              <SmartImage
-                query={promo.imageQuery || promo.category || promo.name}
-                width={320}
-                height={160}
-                alt={promo.name}
+              <img
+                src={promo.image}
+                alt={`Imagem do restaurante ${promo.name}`}
                 className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
               />
               <Badge className="absolute top-3 right-3 gradient-gold text-foreground font-bold">
                 {promo.discount}
@@ -109,7 +147,7 @@ const PromotionsCarousel = () => {
           </Card>
         ))}
       </div>
-      <ScrollArrows containerRef={scrollRef} />
+      <ScrollArrows containerRef={scrollRef} ariaLabelPrev="Promoções anteriores" ariaLabelNext="Próximas promoções" />
     </div>
   );
 };

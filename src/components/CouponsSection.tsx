@@ -20,6 +20,14 @@ const coupons = [
     expires: "Expira em 5 dias",
     color: "from-accent to-primary"
   },
+  {
+    id: 3,
+    code: "BORACOMER10",
+    discount: "10% de desconto",
+    description: "Em pedidos acima de R$ 25",
+    expires: "Expira em 5 dias",
+    color: "from-accent to-primary"
+  },
 ];
 
 const CouponsSection = () => {

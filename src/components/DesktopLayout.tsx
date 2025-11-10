@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Search, Compass, Heart, PlusCircle, User, Menu, LayoutGrid } from "lucide-react";
+import { Home, Search, Compass, Heart, PlusCircle, User, Menu, LayoutGrid, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DeviceFrame from "@/components/DeviceFrame";
@@ -29,6 +29,10 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ children }) => {
           <Link to="/map" className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
             <Search className="h-5 w-5" />
             <span>Mapa</span>
+          </Link>
+          <Link to="/coupons" className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
+            <Ticket className="h-5 w-5" />
+            <span>Meus Cupons</span>
           </Link>
           <Link to="/profile" className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
             <User className="h-5 w-5" />

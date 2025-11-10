@@ -1,24 +1,37 @@
 
-
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import useIsMobile from "../hooks/use-is-mobile";
+import { BREAKPOINTS, isTabletWidth } from "@/lib/breakpoints";
+import useViewportWidth from "@/hooks/use-viewport-width";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SmartLogo from "@/components/ui/SmartLogo";
+import logoBurgerPremium from "@/assets/logo-burger-premium.png";
+import logoPizzaNapoletana from "@/assets/logo-pizza-napoletana.png";
+import logoSushiExpress from "@/assets/logo-sushi-express.png";
+import logoTacoLoco from "@/assets/logo-taco-loco.png";
+import logoTheBurger from "@/assets/logo-the-burger.png";
+import logoCafeCia from "@/assets/logo-cafe-cia.png";
+import logoSweetTreats from "@/assets/logo-sweet-treats.png";
+import logoHealthyBites from "@/assets/logo-healthy-bites.png";
+import logoSeafoodShack from "@/assets/logo-seafood-shack.png";
+import logoPastaPalace from "@/assets/logo-pasta-palace.png";
+import logoBreakfastClub from "@/assets/logo-breakfast-club.png";
 
 const stories = [
-  { id: 1, name: "Burger House", image: "🍔" },
-  { id: 2, name: "Pizza Bella", image: "🍕" },
-  { id: 3, name: "Sushi Master", image: "🍱" },
-  { id: 4, name: "Café & Cia", image: "☕" },
-  { id: 5, name: "Taco Loco", image: "🌮" },
-  { id: 6, name: "Vegan Delights", image: "🥗" },
-  { id: 7, name: "Sweet Treats", image: "🍰" },
-  { id: 8, name: "Healthy Bites", image: "🍎" },
+  { id: 1, name: "Burger Premium", logo: logoBurgerPremium, slug: "burger-premium" },
+  { id: 2, name: "Pizza Napoletana", logo: logoPizzaNapoletana, slug: "pizza-napoletana" },
+  { id: 3, name: "Sushi Express", logo: logoSushiExpress, slug: "sushi-express" },
+  { id: 4, name: "Taco Loco", logo: logoTacoLoco, slug: "taco-loco" },
+  { id: 5, name: "The Burger", logo: logoTheBurger, slug: "bfs" },
+  { id: 6, name: "Café & Cia", logo: logoCafeCia },
+  { id: 7, name: "Sweet Treats", logo: logoSweetTreats },
+  { id: 8, name: "Healthy Bites", logo: logoHealthyBites },
   { id: 9, name: "Grill Master", image: "🍖" },
-  { id: 10, name: "Seafood Shack", image: "🍤" },
-  { id: 11, name: "Pasta Palace", image: "🍝" },
+  { id: 10, name: "Seafood Shack", logo: logoSeafoodShack },
+  { id: 11, name: "Pasta Palace", logo: logoPastaPalace },
   { id: 12, name: "Juice Bar", image: "🥤" },
-  { id: 13, name: "Breakfast Club", image: "🍳" },
+  { id: 13, name: "Breakfast Club", logo: logoBreakfastClub },
   { id: 14, name: "Ice Cream Dream", image: "🍦" },
   { id: 15, name: "Smoothie King", image: "🥭" },
   { id: 16, name: "Vegan Vibes", image: "🥦" },
@@ -40,11 +53,16 @@ const stories = [
 
 const StoriesSection = () => {
   // alinhar com Tailwind: sm = 640px
-  const isMobile = useIsMobile(640);
-  // 6 no desktop, 4 no mobile
-  const itemsPerPage = isMobile ? 4 : 6;
-  const stepCount = isMobile ? 2 : 3; // mover 3 no desktop para sensação de passagem
-  const maxNameLen = isMobile ? 10 : 12;
+  const isMobile = useIsMobile(BREAKPOINTS.sm);
+  // acompanhar viewport para distinguir tablet (hook central)
+  const vw = useViewportWidth({ initial: BREAKPOINTS.lg, throttleMs: 120 });
+
+  const isTablet = isTabletWidth(vw);
+  // 6 no desktop, 5 no tablet, 4 no mobile
+  const itemsPerPage = isMobile ? 4 : isTablet ? 5 : 6;
+  const stepCount = isMobile ? 2 : 3; // mover 3 no desktop/tablet para sensação de passagem
+  // Refinar truncagem por breakpoint para uniformizar altura
+  const maxNameLen = isMobile ? 9 : isTablet ? 11 : 12;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -85,28 +103,53 @@ const StoriesSection = () => {
     <div className="px-4 py-4 relative">
       <div
         ref={scrollRef}
-        className="flex gap-4 sm:gap-7 justify-start items-start overflow-x-auto scrollbar-hide snap-x snap-mandatory px-6 sm:px-8 pb-2 pr-6 sm:pr-12"
+        className="flex gap-4 sm:gap-6 justify-start items-start overflow-x-auto scrollbar-hide snap-x snap-mandatory px-6 sm:px-8 pb-2 pr-6 sm:pr-12"
       >
-        {stories.map((story) => (
-          <div key={story.id} className="flex flex-col items-center gap-2 mx-1 sm:mx-2 flex-shrink-0 snap-start">
-            <div className="relative bg-gradient-to-br from-primary to-accent p-[2px] rounded-full">
-              <div className="bg-background rounded-full p-[3px]">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden">
-                  <SmartLogo name={story.name} width={logoSize} height={logoSize} title={story.name} />
+        {stories.map((story) => {
+          const content = (
+            <>
+              <div className="relative bg-gradient-to-br from-primary to-accent p-[2px] rounded-full transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30">
+                <div className="bg-background rounded-full p-[3px]">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                    {story.logo ? (
+                      <img 
+                        src={story.logo} 
+                        alt={story.name} 
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <SmartLogo name={story.name} width={logoSize} height={logoSize} title={story.name} fontScale={isTablet ? 0.34 : 0.36} />
+                    )}
+                  </div>
                 </div>
               </div>
+              <span className="text-[12px] leading-tight text-center text-foreground/80 font-medium max-w-20 sm:max-w-24 truncate transition-colors duration-200 group-hover:text-primary">
+                {formatName(story.name)}
+              </span>
+            </>
+          );
+
+          return story.slug ? (
+            <Link 
+              key={story.id} 
+              to={`/store/${story.slug}`}
+              className="flex flex-col items-center gap-2 mx-1 sm:mx-2 flex-shrink-0 snap-start group cursor-pointer"
+            >
+              {content}
+            </Link>
+          ) : (
+            <div key={story.id} className="flex flex-col items-center gap-2 mx-1 sm:mx-2 flex-shrink-0 snap-start group">
+              {content}
             </div>
-            <span className="text-[12px] leading-tight text-center text-foreground/80 font-medium max-w-20 sm:max-w-24 truncate">
-              {formatName(story.name)}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {showLeftArrow && (
         <button
           onClick={() => scrollByStep("prev")}
-          className="absolute -left-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-card rounded-full shadow z-10 focus:outline-none border border-border hover:bg-muted"
+          className="absolute -left-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-card rounded-full shadow-md z-10 focus:outline-none border border-border hover:bg-muted transition-all duration-200 hover:scale-110 hover:shadow-lg"
           aria-label="Stories anteriores"
         >
           <ChevronLeft className="h-4 w-4 text-foreground" />
@@ -115,7 +158,7 @@ const StoriesSection = () => {
       {showRightArrow && (
         <button
           onClick={() => scrollByStep("next")}
-          className="absolute -right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-card rounded-full shadow z-10 focus:outline-none border border-border hover:bg-muted"
+          className="absolute -right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-card rounded-full shadow-md z-10 focus:outline-none border border-border hover:bg-muted transition-all duration-200 hover:scale-110 hover:shadow-lg"
           aria-label="Próximos stories"
         >
           <ChevronRight className="h-4 w-4 text-foreground" />
