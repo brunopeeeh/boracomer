@@ -1,6 +1,6 @@
-import { ArrowLeft, MapPin, Navigation, Locate } from "lucide-react";
+import { ArrowLeft, MapPin, Navigation, Locate, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense, lazy } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
+import { loadLojas } from "@/lib/data";
 import SmartImage from "@/components/ui/SmartImage";
-import MapboxMap from "@/components/MapboxMap";
+const MapboxMap = lazy(() => import("@/components/MapboxMap"));
 
 // Tipos e utilitários para lojas.json
 interface RawLoja {
@@ -93,14 +94,10 @@ const Map = () => {
     { value: 10, label: "10 km" },
   ];
 
-  // Buscar lojas.json via react-query
+  // Buscar lojas.json via react-query com validação Zod
   const { data: lojasData, isLoading: isLoadingLojas } = useQuery({
     queryKey: ["lojas.json"],
-    queryFn: async () => {
-      const res = await fetch("/lojas.json");
-      if (!res.ok) throw new Error("Erro ao carregar lojas.json");
-      return res.json() as Promise<{ result: RawLoja[] }>;
-    },
+    queryFn: loadLojas,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -136,7 +133,7 @@ const Map = () => {
 
   // Mapear lojas para restaurantes e filtrar por raio
   const restaurants: Restaurant[] = useMemo(() => {
-    const entries = lojasData?.result ?? [];
+    const entries = lojasData ?? [];
     return entries.map((loja, idx) => {
       const coords: [number, number] = [loja.Longitude, loja.Latitude];
       const distKm = userLocation ? calculateDistance(userLocation, coords) : undefined;
@@ -173,18 +170,29 @@ const Map = () => {
             </Button>
             <h1 className="text-xl font-bold text-foreground">Mapa</h1>
           </div>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={handleGetLocation}
-            disabled={isLocating}
-          >
-            {isLocating ? (
-              <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-            ) : (
-              <Locate className="h-4 w-4" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleGetLocation}
+              disabled={isLocating}
+            >
+              {isLocating ? (
+                <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+              ) : (
+                <Locate className="h-4 w-4" />
+              )}
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTokenInput(true)}
+              className="flex items-center gap-1"
+            >
+              <Key className="h-4 w-4" />
+              Token
+            </Button>
+          </div>
         </div>
 
         {/* Radius Filters */}
@@ -237,17 +245,17 @@ const Map = () => {
 
       {/* Mapa Interativo */}
       <div className="relative h-[70vh]">
-        {!isLoadingLojas && (
-        <MapboxMap
-          restaurants={filteredRestaurants}
-          apiKey={mapboxToken}
-          radiusFilter={radiusFilter}
-          userLocation={userLocation}
-          onRestaurantClick={(restaurant) => {
-            toast.info(`${restaurant.name} - ${restaurant.discount}`);
-          }}
-        />
-        )}
+        <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-muted-foreground">Carregando mapa…</div>}>
+          <MapboxMap
+            restaurants={filteredRestaurants}
+            apiKey={mapboxToken}
+            radiusFilter={radiusFilter}
+            userLocation={userLocation}
+            onRestaurantClick={(restaurant) => {
+              toast.info(`${restaurant.name} - ${restaurant.discount}`);
+            }}
+          />
+        </Suspense>
       </div>
 
       <BottomNav />

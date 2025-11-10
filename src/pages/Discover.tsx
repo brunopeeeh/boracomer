@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Search, Filter, Star, MapPin, Clock, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
+import { Skeleton } from "@/components/ui/skeleton";
+import { loadBfs } from "@/lib/data";
+import { loadYoogaStore } from "@/lib/yooga";
+import logoBurgerPremium from "@/assets/logo-burger-premium.png";
+import logoPizzaNapoletana from "@/assets/logo-pizza-napoletana.png";
+import logoSushiExpress from "@/assets/logo-sushi-express.png";
+import logoTacoLoco from "@/assets/logo-taco-loco.png";
 
 const restaurants = [
   {
@@ -17,8 +24,7 @@ const restaurants = [
     reviews: 234,
     distance: "1.2 km",
     time: "25-35 min",
-    image: "hamburger",
-    imageQuery: "gourmet burger close up juicy cheeseburger",
+    logo: logoBurgerPremium,
     posts: 45,
     followers: 1200,
     description: "Os melhores hambúrgueres artesanais da cidade",
@@ -31,8 +37,7 @@ const restaurants = [
     reviews: 456,
     distance: "2.5 km",
     time: "30-40 min",
-    image: "pizza",
-    imageQuery: "pepperoni pizza close up lots of pepperoni",
+    logo: logoPizzaNapoletana,
     posts: 78,
     followers: 2300,
     description: "Autêntica pizza italiana no forno a lenha",
@@ -45,8 +50,7 @@ const restaurants = [
     reviews: 189,
     distance: "0.8 km",
     time: "20-30 min",
-    image: "sushi",
-    imageQuery: "assorted sushi platter nigiri maki sashimi philadelphia roll",
+    logo: logoSushiExpress,
     posts: 34,
     followers: 890,
     description: "Sushi fresco e delivery rápido",
@@ -59,8 +63,7 @@ const restaurants = [
     reviews: 167,
     distance: "1.5 km",
     time: "20-30 min",
-    image: "tacos",
-    imageQuery: "tacos al pastor close up street food",
+    logo: logoTacoLoco,
     posts: 28,
     followers: 650,
     description: "Sabores autênticos do México",
@@ -70,10 +73,64 @@ const restaurants = [
 const Discover = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [bfsCard, setBfsCard] = useState<any | null>(null);
 
-  const filteredRestaurants = restaurants.filter(restaurant =>
+  // Simula carregamento leve para exibir skeletons e evitar layout shift
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 350);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Carrega a primeira loja real do bfs.json e mapeia para o card
+  useEffect(() => {
+    async function load() {
+      try {
+        const lojas = await loadBfs();
+        const loja = lojas[0];
+        if (!loja) return;
+        // Tenta enriquecer com informações da API Yooga (descrição, tempo)
+        const yooga = await loadYoogaStore("bfs");
+        const timeStr = (() => {
+          const min = yooga?.min_delivery_time;
+          const max = yooga?.max_delivery_time;
+          if (min && max) return `${min}-${max} min`;
+          if (min && !max) return `${min} min`;
+          if (!min && max) return `${max} min`;
+          return "";
+        })();
+        const description = yooga?.description || loja.tipo_atendimento || "";
+        const card = {
+          id: 9999,
+          name: loja.nome_empresa,
+          category: loja.modelo_negocio || "",
+          rating: undefined,
+          reviews: undefined,
+          distance: "",
+          time: timeStr,
+          image: (yooga?.img || loja.img || loja.modelo_negocio || loja.nome_empresa),
+          imageQuery: (yooga?.img || loja.img || loja.modelo_negocio || loja.nome_empresa),
+          posts: undefined,
+          followers: undefined,
+          description,
+          slug: "bfs",
+        };
+        setBfsCard(card);
+      } catch {}
+    }
+    load();
+  }, []);
+
+  const allRestaurants = useMemo(() => {
+    return [
+      ...(bfsCard ? [bfsCard] : []),
+      ...restaurants,
+    ];
+  }, [bfsCard]);
+
+  const filteredRestaurants = allRestaurants.filter(restaurant =>
     restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    restaurant.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (restaurant.category || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -107,20 +164,65 @@ const Discover = () => {
       </header>
 
       <div className="px-4 py-4 space-y-4">
-        {filteredRestaurants.map((restaurant, index) => (
+        {isLoading && (
+          <>
+            {[0,1,2].map((i) => (
+              <Card key={`skeleton-${i}`} className="overflow-hidden shadow-soft">
+                <div className="flex gap-4 p-4">
+                  <Skeleton className="w-24 h-24 rounded-xl" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-2/3 mb-2" />
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </>
+        )}
+        {!isLoading && filteredRestaurants.map((restaurant, index) => (
           <Card
             key={restaurant.id}
             className="overflow-hidden shadow-soft hover:shadow-lg transition-smooth cursor-pointer animate-fade-in"
             style={{ animationDelay: `${index * 50}ms` }}
+            onClick={() => {
+              if ((restaurant as any).slug) {
+                navigate(`/store/${(restaurant as any).slug}`);
+              } else {
+                // Navega para a página de loja usando um slug baseado no nome
+                const slug = restaurant.name.toLowerCase().replace(/\s+/g, '-');
+                navigate(`/store/${slug}`);
+              }
+            }}
           >
             <div className="flex gap-4 p-4">
-              <SmartImage
-                query={restaurant.imageQuery || restaurant.image || restaurant.category || restaurant.name}
-                width={96}
-                height={96}
-                alt={restaurant.name}
-                className="w-24 h-24 rounded-xl flex-shrink-0"
-              />
+              {(restaurant as any).logo ? (
+                <img
+                  src={(restaurant as any).logo}
+                  alt={restaurant.name}
+                  className="w-24 h-24 rounded-xl flex-shrink-0 object-cover bg-white"
+                />
+              ) : (
+                <SmartImage
+                  query={(restaurant as any).imageQuery || (restaurant as any).image || restaurant.category || restaurant.name}
+                  width={96}
+                  height={96}
+                  alt={restaurant.name}
+                  enableSrcSet={restaurant.id !== 9999}
+                  className="w-24 h-24 rounded-xl flex-shrink-0"
+                />
+              )}
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1">
@@ -138,26 +240,36 @@ const Discover = () => {
                 </p>
                 
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-accent text-accent" />
-                    <span className="text-xs font-semibold">{restaurant.rating}</span>
-                    <span className="text-xs text-muted-foreground">({restaurant.reviews})</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    {restaurant.distance}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    {restaurant.time}
-                  </div>
+                  {restaurant.rating && (
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-accent text-accent" />
+                      <span className="text-xs font-semibold">{restaurant.rating}</span>
+                      {restaurant.reviews && (
+                        <span className="text-xs text-muted-foreground">({restaurant.reviews})</span>
+                      )}
+                    </div>
+                  )}
+                  {restaurant.distance && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {restaurant.distance}
+                    </div>
+                  )}
+                  {restaurant.time && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {restaurant.time}
+                    </div>
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{restaurant.posts} posts</span>
-                  <span>•</span>
-                  <span>{restaurant.followers} seguidores</span>
-                </div>
+                {(restaurant.posts && restaurant.followers) && (
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{restaurant.posts} posts</span>
+                    <span>•</span>
+                    <span>{restaurant.followers} seguidores</span>
+                  </div>
+                )}
               </div>
             </div>
           </Card>

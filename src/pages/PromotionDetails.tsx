@@ -3,7 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import SmartImage from "@/components/ui/SmartImage";
+import burgerImage from "@/assets/burger-premium.jpg";
+import pizzaImage from "@/assets/pizza-napoletana.jpg";
+import sushiImage from "@/assets/sushi-platter.jpg";
 
 const promotionsData = {
   "1": {
@@ -124,12 +126,10 @@ const PromotionDetails = () => {
 
       {/* Hero Image */}
       <div className="relative h-64">
-        <SmartImage
-          query={promotion.imageQuery || promotion.category || promotion.name}
-          width={1024}
-          height={256}
+        <img
+          src={promotion.image}
           alt={promotion.name}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="w-full h-full object-cover"
         />
         <Badge className="absolute top-4 right-4 gradient-gold text-foreground font-bold text-lg px-4 py-2">
           {promotion.discount}
