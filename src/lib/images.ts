@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
+function isFullUrl(query: string): boolean {
+  return /^https?:\/\//i.test(query.trim());
+}
+
 export function getFallbackImageUrl(query: string, width = 320, height = 240): string {
   const q = encodeURIComponent(query.toLowerCase());
   return `https://picsum.photos/seed/${q}/${width}/${height}`;
@@ -27,12 +31,20 @@ const cache = new Map<string, string>();
 
 export function useImageUrl(query: string, width = 320, height = 240) {
   const key = useMemo(() => `${query}:${width}x${height}`.toLowerCase(), [query, width, height]);
-  const [url, setUrl] = useState<string>(() => cache.get(key) || getFallbackImageUrl(query, width, height));
+  const [url, setUrl] = useState<string>(() => {
+    if (isFullUrl(query)) return query;
+    return cache.get(key) || getFallbackImageUrl(query, width, height);
+  });
   const provider = (import.meta.env.VITE_IMAGE_PROVIDER as string | undefined)?.toLowerCase();
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      if (isFullUrl(query)) {
+        cache.set(key, query);
+        if (mounted) setUrl(query);
+        return;
+      }
       const cached = cache.get(key);
       if (cached) {
         if (mounted) setUrl(cached);
@@ -61,6 +73,7 @@ export function useImageUrl(query: string, width = 320, height = 240) {
 // Resolver assíncrono para uso fora de componentes React (ex.: Mapbox HTML markers)
 export async function resolveImageUrlAsync(query: string, width = 320, height = 240): Promise<string> {
   try {
+    if (isFullUrl(query)) return query;
     const provider = (import.meta.env.VITE_IMAGE_PROVIDER as string | undefined)?.toLowerCase();
     if (provider === "picsum") {
       return getFallbackImageUrl(query, width, height);
